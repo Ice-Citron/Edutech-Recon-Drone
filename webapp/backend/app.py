@@ -67,13 +67,11 @@ def predict():
     try:
         img = Image.open(io.BytesIO(file.read()))
         img = img.resize((64, 64))
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
         img_array = np.array(img)
-
-        if img_array.ndim == 2:  # Grayscale image
-            img_array = np.stack((img_array,) * 3, axis=-1)
-
         img_array = np.expand_dims(img_array, axis=0)
-        img_array = img_array.astype('float32') / 255.0
+        img_array = img_array.astype('float32') / 255.0 
 
         predictions = model.predict(img_array)
         predicted_class = np.argmax(predictions, axis=1)[0]
