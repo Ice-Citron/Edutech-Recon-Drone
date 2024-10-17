@@ -1,5 +1,5 @@
 import React from 'react';
-import FileUpload from './FileUpload'; // Adjust the import path based on your project structure
+import FileUpload from './FileUpload'; 
 
 const App = () => {
   return (

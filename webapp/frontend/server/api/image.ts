@@ -15,15 +15,15 @@ if (!apps.length) {
     });
 }
 
-app.get('/images', async (req, res) => {
+app.get('/predictions', async (req, res) => {
     try {
         const db = getFirestore();
-        const imagesSnap = await db.collection('images').get();
-        const imagesData = imagesSnap.docs.map(doc => ({
+        const predictionsSnap = await db.collection('predictions').get();
+        const predictionsData = predictionsSnap.docs.map(doc => ({
             uuid: doc.id,
             ...doc.data()
         }));
-        res.json(imagesData); 
+        res.json(predictionsData); 
     } catch (error) {
         console.error("Error fetching images:", error);
         res.status(500).send("Error fetching images");
