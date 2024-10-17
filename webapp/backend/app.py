@@ -8,15 +8,18 @@ from PIL import Image
 import io
 import os
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 
 app = Flask(__name__)
 CORS(app)  
 
 cred = credentials.Certificate('../frontend/airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json')
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'airecondrone.appspot.com'  
+})
 
 db = firestore.client()
+bucket = storage.bucket()
 
 print("Loading model...")
 try:
@@ -70,7 +73,20 @@ def predict():
 
     file = request.files['file']
     try:
-        img = Image.open(io.BytesIO(file.read()))
+        file_content = file.read()
+
+        # Upload the image to Firebase Storage
+        blob = bucket.blob(file.filename)
+        blob.upload_from_file(io.BytesIO(file_content), content_type=file.content_type)
+
+        # URL-encode the filename to handle spaces and special characters
+        image_path = file.filename.replace(" ", "%20")  # Replace spaces with %20
+        
+        # Construct the Firebase Storage URL
+        image_url = f"https://firebasestorage.googleapis.com/v0/b/airecondrone.appspot.com/o/{image_path}?alt=media"
+
+        # Prepare the image for prediction
+        img = Image.open(io.BytesIO(file_content))
         img = img.resize((64, 64))
         if img.mode != 'RGB':
             img = img.convert('RGB')
@@ -78,32 +94,44 @@ def predict():
         img_array = np.expand_dims(img_array, axis=0)
         img_array = img_array.astype('float32') / 255.0 
 
+        # Make predictions
         predictions = model.predict(img_array)
         predicted_class = np.argmax(predictions, axis=1)[0]
 
         # Save the prediction to Firestore
-        doc_ref_tuple = db.collection('predictions').add({
+        doc_ref = db.collection('predictions').add({
             'predicted_class': CLASS_NAMES[predicted_class],
             'file_name': file.filename,
+            'image_url': image_url,  
             'timestamp': firestore.SERVER_TIMESTAMP
         })
 
-        print("Document reference returned:", doc_ref_tuple)
+        _, doc_ref = doc_ref
+        document_id = doc_ref.id  
 
-        if isinstance(doc_ref_tuple, tuple):
-            print("doc_ref is a tuple. Content:", doc_ref_tuple)
-            _, doc_ref = doc_ref_tuple  
-
-            document_id = doc_ref.id 
-        else:
-            document_id = doc_ref_tuple.id  
-
-        return jsonify({'predicted_class': CLASS_NAMES[predicted_class], 'document_id': document_id})
-
+        return jsonify({'predicted_class': CLASS_NAMES[predicted_class], 'document_id': document_id, 'image_url': image_url})
 
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/recent-image', methods=['GET'])
+def get_recent_image():
+    try:
+        # Retrieve the most recent document from Firestore
+        predictions_ref = db.collection('predictions').order_by('timestamp', direction=firestore.Query.DESCENDING).limit(1)
+        recent_prediction = predictions_ref.get()
+
+        if recent_prediction:
+            recent_doc = recent_prediction[0].to_dict()
+            return jsonify({'image_url': recent_doc['image_url']}), 200
+        else:
+            return jsonify({'error': 'No predictions found'}), 404
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050)
