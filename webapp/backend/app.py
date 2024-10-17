@@ -7,9 +7,16 @@ import numpy as np
 from PIL import Image
 import io
 import os
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 app = Flask(__name__)
 CORS(app)  
+
+cred = credentials.Certificate('../frontend/airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json')
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 print("Loading model...")
 try:
@@ -18,7 +25,6 @@ try:
     x = GlobalAveragePooling2D()(x)
     predictions = Dense(200, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
-    model.summary()  # Print model architecture for debugging
 
     MODEL_PATH = 'optimal_densenet.keras'
     if os.path.exists(MODEL_PATH):
@@ -28,7 +34,6 @@ try:
         raise FileNotFoundError(f"Model weights not found at {MODEL_PATH}")
 except Exception as e:
     print(f"Error loading the model: {e}")
-    traceback.print_exc()
 
 CLASS_NAMES = ['墨.png', '竟.png', '章.png', '隐.png', '隔.png', '隘.png', '隙.png', '障.png', '隧.png',
                '隶.png', '难.png', '雀.png', '雁.png', '雄.png', '雅.png', '集.png', '雇.png', '雌.png',
@@ -76,7 +81,25 @@ def predict():
         predictions = model.predict(img_array)
         predicted_class = np.argmax(predictions, axis=1)[0]
 
-        return jsonify({'predicted_class': CLASS_NAMES[predicted_class]})
+        # Save the prediction to Firestore
+        doc_ref_tuple = db.collection('predictions').add({
+            'predicted_class': CLASS_NAMES[predicted_class],
+            'file_name': file.filename,
+            'timestamp': firestore.SERVER_TIMESTAMP
+        })
+
+        print("Document reference returned:", doc_ref_tuple)
+
+        if isinstance(doc_ref_tuple, tuple):
+            print("doc_ref is a tuple. Content:", doc_ref_tuple)
+            _, doc_ref = doc_ref_tuple  
+
+            document_id = doc_ref.id 
+        else:
+            document_id = doc_ref_tuple.id  
+
+        return jsonify({'predicted_class': CLASS_NAMES[predicted_class], 'document_id': document_id})
+
 
     except Exception as e:
         print(f"Error: {e}")
