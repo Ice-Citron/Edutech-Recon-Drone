@@ -5,6 +5,7 @@ from tensorflow.keras.models import Model
 from flask_cors import CORS  
 import numpy as np
 from PIL import Image
+from PIL.ExifTags import TAGS, GPSTAGS
 import io
 import os
 import firebase_admin
@@ -81,7 +82,7 @@ def predict():
 
         # URL-encode the filename to handle spaces and special characters
         image_path = file.filename.replace(" ", "%20")  # Replace spaces with %20
-        
+         
         # Construct the Firebase Storage URL
         image_url = f"https://firebasestorage.googleapis.com/v0/b/airecondrone.appspot.com/o/{image_path}?alt=media"
 
@@ -132,6 +133,100 @@ def get_recent_image():
         print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+def get_exif_data(image):
+    """Extract EXIF data from an image."""
+    exif_data = {}
+    try:
+        exif = image._getexif()  
+        if exif:
+            for tag, value in exif.items():
+                decoded_tag = TAGS.get(tag, tag)
+                exif_data[decoded_tag] = value
+    except Exception as e:
+        print(f"Error reading EXIF data: {e}")
+    return exif_data
+
+def get_gps_data(exif_data):
+    """Extract GPS data from EXIF."""
+    gps_data = {}
+    if "GPSInfo" in exif_data:
+        for key in exif_data["GPSInfo"].keys():
+            decoded_key = GPSTAGS.get(key, key)
+            gps_data[decoded_key] = exif_data["GPSInfo"][key]
+    return gps_data
+
+def convert_to_degrees(value):
+    """Convert GPS coordinates to degrees."""
+    d, m, s = value
+    return d + (m / 60.0) + (s / 3600.0)
+
+def extract_metadata(image):
+    """Extract relevant metadata (GPS and date) from the image."""
+    exif_data = get_exif_data(image)
+    gps_data = get_gps_data(exif_data)
+
+    latitude = longitude = None
+    if "GPSLatitude" in gps_data and "GPSLatitudeRef" in gps_data:
+        latitude = convert_to_degrees(gps_data["GPSLatitude"])
+        if gps_data["GPSLatitudeRef"] != "N":
+            latitude = -latitude
+
+    if "GPSLongitude" in gps_data and "GPSLongitudeRef" in gps_data:
+        longitude = convert_to_degrees(gps_data["GPSLongitude"])
+        if gps_data["GPSLongitudeRef"] != "E":
+            longitude = -longitude
+
+    date_created = exif_data.get("DateTimeOriginal", "Unknown")
+
+    return latitude, longitude, date_created
+
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+    try:
+        file_content = file.read()
+        
+        # Upload the image to Firebase Storage
+        blob = bucket.blob(file.filename)
+        blob.upload_from_file(io.BytesIO(file_content), content_type=file.content_type)
+
+        # URL-encode the filename to handle spaces and special characters
+        image_path = file.filename.replace(" ", "%20")
+        image_url = f"https://firebasestorage.googleapis.com/v0/b/airecondrone.appspot.com/o/{image_path}?alt=media"
+
+        # Prepare the image for metadata extraction
+        img = Image.open(io.BytesIO(file_content))
+        
+        # Call your metadata extraction function here
+        latitude, longitude, date_created = extract_metadata(img)
+
+        # Save the image details to Firestore
+        doc_ref = db.collection('images').add({
+            'file_name': file.filename,
+            'image_url': image_url,
+            'latitude': latitude,
+            'longitude': longitude,
+            'date_created': date_created
+        })
+
+        _, doc_ref = doc_ref
+        document_id = doc_ref.id  
+
+        return jsonify({
+            'document_id': document_id,
+            'image_url': image_url,
+            'latitude': latitude,
+            'longitude': longitude,
+            'date_created': date_created
+        }), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050)
