@@ -125,25 +125,13 @@ def save_checkpoint(model, epoch, repo, branch_name):
         
         # Save model state
         checkpoint_path = os.path.join(checkpoint_dir, f"model_epoch_{epoch}.pt")
-        
-        # Get model state dict safely
-        if hasattr(model, 'model'):
-            model_state_dict = model.model.state_dict()
-        else:
-            model_state_dict = model.state_dict()
-        
-        # Get optimizer state dict safely
-        optimizer_state_dict = None
-        if hasattr(model, 'optimizer'):
-            optimizer_state_dict = model.optimizer.state_dict()
-        elif hasattr(model.trainer, 'optimizer'):  # For newer YOLO versions
-            optimizer_state_dict = model.trainer.optimizer.state_dict()
+
+        model_state_dict = model.state_dict()
             
         # Save checkpoint
         checkpoint = {
             'epoch': epoch,
             'model_state_dict': model_state_dict,
-            'optimizer_state_dict': optimizer_state_dict,
             'wandb_run_id': wandb.run.id if wandb.run else None
         }
         
