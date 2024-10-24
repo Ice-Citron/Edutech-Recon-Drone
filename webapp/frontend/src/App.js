@@ -4,7 +4,7 @@ import FileUpload from './FileUpload';
 const App = () => {
   return (
     <div>
-      <h1>Image Processing App</h1>
+      <h1>Recon Drone</h1>
       <FileUpload /> 
     </div>
   );
