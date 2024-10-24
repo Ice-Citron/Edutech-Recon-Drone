@@ -1,6 +1,2 @@
-backend/__pycache__
-frontend/node_modules
-frontend/airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json
-frontend/src/firebase.js
+backend/airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json
 ./node_modules
-./.DS_Store

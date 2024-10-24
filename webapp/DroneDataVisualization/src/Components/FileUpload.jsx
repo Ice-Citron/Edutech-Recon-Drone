@@ -1,10 +1,13 @@
+// Update the import statement at the top of the file
 import React, { useState } from 'react';
 import axios from 'axios';
 import { db } from './firebase'; // Ensure correct import path
 import { doc, getDoc } from 'firebase/firestore'; // Import Firestore functions
 
-const FileUpload = () => {
+// Destructure onUploadSuccess from props
+const FileUpload = ({ onUploadSuccess }) => {  // Fix here
   const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState(''); // State to hold the file name
   const [prediction, setPrediction] = useState('');  // Trash count
   const [imageURL, setImageURL] = useState('');  // URL of uploaded image
   const [boundingBoxImageURL, setBoundingBoxImageURL] = useState('');  // URL of bounding box image
@@ -12,7 +15,9 @@ const FileUpload = () => {
   const [error, setError] = useState(''); // State to hold error messages
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setFileName(selectedFile ? selectedFile.name : ''); // Set file name
     setPrediction('');  
     setImageURL('');  
     setBoundingBoxImageURL('');  
@@ -53,6 +58,8 @@ const FileUpload = () => {
           latitude: docData.latitude,
           longitude: docData.longitude,
         });
+
+        onUploadSuccess();  // This will now work correctly
       } else {
         setError('No metadata found for the uploaded image.');
       }
@@ -65,36 +72,45 @@ const FileUpload = () => {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload} style={{ marginLeft: '10px' }}>
-        Upload & Predict
+      {/* Hide the default file input */}
+      <input 
+        type="file" 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} // Hide the input
+        id="file-upload" // Add an ID for the custom button to reference
+      />
+      {/* Create a custom button to trigger the file input */}
+      <label htmlFor="file-upload" style={{
+        display: 'flex',                 // Use flexbox
+        flexDirection: 'column',         // Arrange children in a column
+        justifyContent: 'center',        // Center content vertically
+        alignItems: 'center',            // Center content horizontally
+        height: '20vh',
+        width: '25vw',
+        color: 'black',                  // Set text color
+        border: 'black dotted',
+        background: 'lightgray',
+        textAlign:'center',
+        cursor: 'pointer',
+        marginBottom: '10px',           // Space between file input and upload button
+        position: 'absolute',
+        margin: '20px 0 0 0',
+        right: '50%',
+        transform: 'translateX(50%)'
+      }}>
+          Choose File
+          {fileName && <p style={{ margin: '10px 0 0 0', fontSize:'10pt' }}>Selected File: {fileName}</p>} {/* Display selected file name */}
+      </label>
+
+      <button style={{ position: 'absolute', 
+                    background: '#007bff', color: 'white', 
+                    right: '50%', bottom:'20px',
+                    transform: 'translateX(50%)'}}
+                    onClick={handleUpload}>
+        Upload
       </button>
 
       {prediction && <p>{prediction}</p>}
-
-      {imageURL && boundingBoxImageURL && (
-        <div style={{ display: 'flex', marginTop: '20px' }}>
-          <div style={{ marginRight: '10px' }}>
-            <h3>Uploaded Image:</h3>
-            <img src={imageURL} alt="Uploaded" style={{ width: '300px', height: 'auto' }} />
-          </div>
-
-          <div>
-            <h3>Image with Bounding Boxes:</h3>
-            <img src={boundingBoxImageURL} alt="Bounding Boxes" style={{ width: '300px', height: 'auto' }} />
-          </div>
-        </div>
-      )}
-
-      {metadata && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Extracted Metadata:</h3>
-          <p>Date Created: {metadata.date_created}</p>
-          <p>Latitude: {metadata.latitude}</p>
-          <p>Longitude: {metadata.longitude}</p>
-        </div>
-      )}
-
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );

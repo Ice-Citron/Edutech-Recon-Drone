@@ -4,6 +4,8 @@ import GarbageImage from "../images/garbage.png";
 import Garbage from "./Garbage";
 
 // Backend
+import Modal from "./Modal";
+import FileUpload from "./FileUpload";
 import { db } from './firebase.js'; 
 import { collection, getDocs } from 'firebase/firestore'; 
 
@@ -54,6 +56,15 @@ const libraries = ["visualization"];
 
 function Map() {
     const [garbageData, setGarbageData] = useState([]); // Using a state variable to store garbage data
+    const [isFileUploadVisible, setFileUploadVisible] = useState(false);
+
+    const showFileUpload = () => {
+        setFileUploadVisible(true);
+    };
+
+    const hideFileUpload = () => {
+        setFileUploadVisible(false);
+    };
 
     const fetchGarbageData = async () => {
         try {
@@ -64,7 +75,8 @@ function Map() {
             docData.latitude,
             docData.longitude,
             docData.date_created,
-            docData.image_url
+            docData.image_url,
+            docData.trash_count
             );
         });
         setGarbageData(fetchedGarbageData); // Update the state with fetched data
@@ -158,7 +170,7 @@ function Map() {
                 <GoogleMap
                     mapContainerStyle={containerStyle}
                     center={center}
-                    zoom={9.9}
+                    zoom={9.8}
                     onLoad={onLoad}
                     onUnmount={onUnmount}
                     options={{
@@ -193,7 +205,13 @@ function Map() {
                         >
                             <div style={{ color: '#333', fontFamily: 'Arial, sans-serif' }}>
                                 <h3 style={{ color: '#1a73e8', marginBottom: '10px' }}>Garbage Information</h3>
-                                <p><strong style={{ color: '#4285f4' }}>Date:</strong> {garbageData[activeMarker].date || "No Date Provided"}</p>
+                                <p>
+                                    <strong style={{ color: '#4285f4' }}>Date & Time: </strong> 
+                                    {garbageData[activeMarker].date || "No Date Provided"}
+                                    <br></br>
+                                    <strong style={{ color: '#4285f4' }}>Number of Trash: </strong> 
+                                    {garbageData[activeMarker].trash_count || "0"}
+                                </p>
                                 {garbageData[activeMarker].picture ? (
                                     <img src={garbageData[activeMarker].picture} alt="Garbage" style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }} />
                                 ) : (
@@ -206,6 +224,36 @@ function Map() {
                     {showHeatmap && <HeatmapLayer data={heatmapData} options={heatmapOptions} />}
                 </GoogleMap>
             </LoadScript>
+            <div style={{
+    position: 'absolute',
+    bottom: '50%',
+    left: '20px',
+    backgroundColor: 'white',
+    borderRadius: '5px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+    zIndex: 1000,
+}}>
+    <button 
+        onClick={showFileUpload}
+        style={{
+            backgroundColor: 'white',
+            color: 'black',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+        }}
+    >
+        Upload Image
+    </button>
+
+    <Modal isOpen={isFileUploadVisible} onClose={hideFileUpload}>
+        <FileUpload onUploadSuccess={() => {
+            hideFileUpload(); // Close the modal
+            fetchGarbageData(); // Refresh the garbage data
+            fetchHeatmapData();
+        }} />
+    </Modal>
+</div>
             <div style={{
     position: 'absolute',
     bottom: '20px',

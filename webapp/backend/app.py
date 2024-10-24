@@ -14,7 +14,7 @@ import numpy as np
 app = Flask(__name__)
 CORS(app)  
 
-cred = credentials.Certificate('../frontend/airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json')
+cred = credentials.Certificate('airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json')
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'airecondrone.appspot.com'
 })
