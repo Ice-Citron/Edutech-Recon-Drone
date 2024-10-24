@@ -127,23 +127,24 @@ def upload_image():
 
         latitude, longitude, date_created = extract_metadata(img)
 
-        metadata = {
+        doc_ref = db.collection('trash_detection').add({
             'image_url': image_url,
             'bounding_box_image_url': box_image_url,
             'trash_count': bounding_boxes_count,
             'latitude': latitude,
             'longitude': longitude,
             'date_created': date_created
-        }
+        })
 
-        # Save the metadata to Firestore
-        db.collection('trash_detection').add(metadata)
+        _, doc_ref = doc_ref
+        document_id = doc_ref.id  
 
         # Return JSON response with both the original image URL and the bounding box image URL
         return jsonify({
             'image_url': image_url,
             'bounding_box_image_url': box_image_url,
-            'trash_count': bounding_boxes_count
+            'trash_count': bounding_boxes_count,
+            'document_id': document_id
         }), 200
 
     except Exception as e:
