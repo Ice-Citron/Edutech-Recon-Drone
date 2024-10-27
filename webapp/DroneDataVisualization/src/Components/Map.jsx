@@ -136,9 +136,11 @@ function Map() {
 
     useEffect(() => {
         if (map && window.google && showHeatmap && isLoaded) {
-            const data = garbageData.map(garbage => ({
+            const data = garbageData
+            .filter(garbage => garbage.trash_count > 0) // Show heatmap if trash count > 0
+            .map(garbage => ({
                 location: new window.google.maps.LatLng(garbage.lat, garbage.lng),
-                weight: 1
+                weight: garbage.trash_count
             }));
             setHeatmapData(data);
         } else {
@@ -183,7 +185,9 @@ function Map() {
                         mapTypeId: mapType
                     }}
                 >
-                    {isLoaded && showGarbage && garbageData.map((garbage, index) => (
+                    {isLoaded && showGarbage && garbageData
+                    .filter(garbage => garbage.trash_count > 0) // Show icon if trash count > 0
+                    .map((garbage, index) => (
                         <Marker
                             key={index}
                             position={{ lat: garbage.lat, lng: garbage.lng }}
