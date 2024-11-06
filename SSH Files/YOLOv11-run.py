@@ -10,7 +10,7 @@ import subprocess
 
 # Hugging Face settings
 HF_REPO = "EduTech-YOLOv11"
-HF_USERNAME = "shng2025"  # Your Hugging Face username
+HF_USERNAME = "shng2025"
 
 def ensure_hf_login():
     """Ensure user is logged in to Hugging Face"""
