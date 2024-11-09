@@ -40,43 +40,47 @@ def run_git_command(command, cwd=None):
         print(f"Error output: {e.stderr}")
         return None
 
+def find_latest_checkpoint(repo_path, branch_name):
+    """Find the latest checkpoint in the repository"""
+    # Use os.path.join to create the full path
+    local_dir = os.path.join(os.getcwd(), repo_path)
+    checkpoint_dir = os.path.join(local_dir, "checkpoints")
+    
+    if not os.path.exists(checkpoint_dir):
+        print(f"No checkpoint directory found at {checkpoint_dir}")
+        return None, 0
+    
+    epochs = []
+    for d in os.listdir(checkpoint_dir):
+        if d.startswith("epoch_"):
+            try:
+                epoch_num = int(d.split("_")[1])
+                epochs.append(epoch_num)
+            except ValueError:
+                continue
+    
+    if not epochs:
+        print("No checkpoints found")
+        return None, 0
+    
+    latest_epoch = max(epochs)
+    checkpoint_path = os.path.join(checkpoint_dir, f"epoch_{latest_epoch}", f"model_epoch_{latest_epoch}.pt")
+    print(f"Found latest checkpoint at: {checkpoint_path}")
+    return checkpoint_path, latest_epoch
+
 def setup_hf_repo(branch_name):
-    """Setup or connect to Hugging Face repository"""
+    """Setup or connect to existing Hugging Face repository"""
     api = HfApi()
     repo_id = f"{HF_USERNAME}/{HF_REPO}"
-    repo_url = f"https://huggingface.co/{repo_id}"
-    local_dir = os.path.abspath(HF_REPO)
     
-    # First, check if the repo exists on HuggingFace
-    try:
-        api.repo_info(repo_id)
-        print(f"Repository {repo_id} found on HuggingFace")
-    except Exception:
-        print(f"Repository {repo_id} not found. Creating new repository...")
-        api.create_repo(repo_id, private=True)
+    # Use existing repository directory
+    local_dir = os.path.join(os.getcwd(), "EduTech-YOLOv11")
     
-    # Remove local directory if it exists but is not a valid git repo
-    if os.path.exists(local_dir):
-        try:
-            Repository(local_dir=local_dir)
-        except ValueError:
-            print(f"Removing invalid repository at {local_dir}")
-            shutil.rmtree(local_dir)
-    
-    # Clone or use existing repository
     if not os.path.exists(local_dir):
-        print(f"Cloning repository from {repo_url}...")
-        repo = Repository(
-            local_dir=local_dir,
-            clone_from=repo_url,
-            use_auth_token=True
-        )
-    else:
-        print(f"Using existing repository at {local_dir}")
-        repo = Repository(
-            local_dir=local_dir,
-            use_auth_token=True
-        )
+        raise ValueError(f"Repository directory {local_dir} does not exist!")
+    
+    print(f"Using existing repository at {local_dir}")
+    repo = Repository(local_dir=local_dir, use_auth_token=True)
     
     # Initialize git lfs
     print("Initializing Git LFS...")
@@ -89,21 +93,23 @@ def setup_hf_repo(branch_name):
         run_git_command(f"git checkout -B {branch_name}", cwd=local_dir)
     
     # Initialize git lfs tracking for specific file types
-    run_git_command("git lfs track '*.pt'", cwd=local_dir)  # Track PyTorch model files
-    run_git_command("git lfs track '*.pth'", cwd=local_dir)  # Track PyTorch state dictionaries
-    run_git_command("git lfs track '*.bin'", cwd=local_dir)  # Track binary files
+    run_git_command("git lfs track '*.pt'", cwd=local_dir)
+    run_git_command("git lfs track '*.pth'", cwd=local_dir)
+    run_git_command("git lfs track '*.bin'", cwd=local_dir)
     
-    # Add .gitattributes to track LFS configurations
+    # Add .gitattributes only if there are changes
     gitattributes_path = os.path.join(local_dir, '.gitattributes')
     if os.path.exists(gitattributes_path):
-        run_git_command("git add .gitattributes", cwd=local_dir)
-        try:
-            run_git_command('git commit -m "Update LFS tracking configurations"', cwd=local_dir)
-        except Exception:
-            print("No changes to .gitattributes to commit")
+        # Check if there are any changes to commit
+        status = run_git_command("git status --porcelain .gitattributes", cwd=local_dir)
+        if status:  # Only commit if there are changes
+            run_git_command("git add .gitattributes", cwd=local_dir)
+            try:
+                run_git_command('git commit -m "Update LFS tracking configurations"', cwd=local_dir)
+            except subprocess.CalledProcessError:
+                print("No changes to commit for .gitattributes")
     
-    print(f"Successfully set up repository and switched to branch: {branch_name}")
-    return repo
+    return repo, local_dir
 
 def save_checkpoint(model, epoch, repo, branch_name):
     """Save checkpoint to Hugging Face repository"""
@@ -125,13 +131,18 @@ def save_checkpoint(model, epoch, repo, branch_name):
         
         # Save model state
         checkpoint_path = os.path.join(checkpoint_dir, f"model_epoch_{epoch}.pt")
-
-        model_state_dict = model.state_dict()
+        
+        # Handle compiled model
+        if model.model.__class__.__name__ == 'OptimizedModule':
+            # If model is compiled, get the original model for saving
+            save_model = model.model._orig_mod
+        else:
+            save_model = model.model
             
         # Save checkpoint
         checkpoint = {
             'epoch': epoch,
-            'model_state_dict': model_state_dict,
+            'model_state_dict': save_model.state_dict(),
             'wandb_run_id': wandb.run.id if wandb.run else None
         }
         
@@ -171,21 +182,14 @@ def save_checkpoint(model, epoch, repo, branch_name):
         
     return True
 
-def get_available_branches():
-    """Get list of available branches from Hugging Face repo"""
-    api = HfApi()
-    repo_id = f"{HF_USERNAME}/{HF_REPO}"
-    try:
-        branches = api.list_repo_refs(repo_id).branches
-        return [b.name for b in branches]
-    except Exception as e:
-        print(f"Error fetching branches: {e}")
-        return []
-
 def find_latest_checkpoint(repo_path, branch_name):
     """Find the latest checkpoint in the repository"""
-    checkpoint_dir = os.path.join(repo_path, "checkpoints")
+    # Use os.path.join to create the full path
+    local_dir = os.path.join(os.getcwd(), repo_path)
+    checkpoint_dir = os.path.join(local_dir, "checkpoints")
+    
     if not os.path.exists(checkpoint_dir):
+        print(f"No checkpoint directory found at {checkpoint_dir}")
         return None, 0
     
     epochs = []
@@ -198,10 +202,67 @@ def find_latest_checkpoint(repo_path, branch_name):
                 continue
     
     if not epochs:
+        print("No checkpoints found")
         return None, 0
     
     latest_epoch = max(epochs)
-    return os.path.join(checkpoint_dir, f"epoch_{latest_epoch}", f"model_epoch_{latest_epoch}.pt"), latest_epoch
+    checkpoint_path = os.path.join(checkpoint_dir, f"epoch_{latest_epoch}", f"model_epoch_{latest_epoch}.pt")
+    print(f"Found latest checkpoint at: {checkpoint_path}")
+    return checkpoint_path, latest_epoch
+
+def setup_hf_repo(branch_name):
+    """Setup or connect to existing Hugging Face repository"""
+    api = HfApi()
+    repo_id = f"{HF_USERNAME}/{HF_REPO}"
+    
+    # Use existing repository directory
+    local_dir = os.path.join(os.getcwd(), "EduTech-YOLOv11")
+    
+    if not os.path.exists(local_dir):
+        raise ValueError(f"Repository directory {local_dir} does not exist!")
+    
+    print(f"Using existing repository at {local_dir}")
+    repo = Repository(local_dir=local_dir, use_auth_token=True)
+    
+    # Initialize git lfs
+    print("Initializing Git LFS...")
+    run_git_command("git lfs install", cwd=local_dir)
+    
+    # Create and checkout new branch or checkout existing branch
+    current_branch = run_git_command("git rev-parse --abbrev-ref HEAD", cwd=local_dir)
+    if current_branch and current_branch != branch_name:
+        print(f"Switching from branch {current_branch} to {branch_name}")
+        run_git_command(f"git checkout -B {branch_name}", cwd=local_dir)
+    
+    # Initialize git lfs tracking for specific file types
+    run_git_command("git lfs track '*.pt'", cwd=local_dir)
+    run_git_command("git lfs track '*.pth'", cwd=local_dir)
+    run_git_command("git lfs track '*.bin'", cwd=local_dir)
+    
+    # Add .gitattributes only if there are changes
+    gitattributes_path = os.path.join(local_dir, '.gitattributes')
+    if os.path.exists(gitattributes_path):
+        # Check if there are any changes to commit
+        status = run_git_command("git status --porcelain .gitattributes", cwd=local_dir)
+        if status:  # Only commit if there are changes
+            run_git_command("git add .gitattributes", cwd=local_dir)
+            try:
+                run_git_command('git commit -m "Update LFS tracking configurations"', cwd=local_dir)
+            except subprocess.CalledProcessError:
+                print("No changes to commit for .gitattributes")
+    
+    return repo, local_dir
+
+def get_available_branches():
+    """Get list of available branches from Hugging Face repo"""
+    api = HfApi()
+    repo_id = f"{HF_USERNAME}/{HF_REPO}"
+    try:
+        branches = api.list_repo_refs(repo_id).branches
+        return [b.name for b in branches]
+    except Exception as e:
+        print(f"Error fetching branches: {e}")
+        return []
 
 
 ##############################################################################################################
@@ -223,56 +284,21 @@ signal.signal(signal.SIGINT, cleanup_handler)
 
 
 def main():
-    # Ensure logged in to Hugging Face
     ensure_hf_login()
-
-    # Ask user whether to continue existing run or start new one
-    print("\nAvailable options:")
-    print("1. Start new training run")
-    print("2. Continue existing run")
-    choice = input("Enter your choice (1/2): ")
-
-    if choice == "2":
-        branches = get_available_branches()
-        if not branches:
-            print("No existing branches found. Starting new run.")
-            choice = "1"
-        else:
-            print("\nAvailable branches:")
-            for i, branch in enumerate(branches, 1):
-                print(f"{i}. {branch}")
-            branch_idx = int(input("\nSelect branch number: ")) - 1
-            branch_name = branches[branch_idx]
-            
-            # Initialize wandb with existing run ID
-            wandb.init(
-                project="Edutech",
-                id=branch_name,  # Use branch name as the run ID
-                resume="must",
-                config={
-                    'epochs': 100,
-                    'batch_size': 120,
-                    'learning_rate': 0.001,
-                    'fp16': True,
-                    'compile': True,
-                }
-            )
-
-    if choice == "1":
-        # First initialize wandb to get a new run ID
-        wandb.init(
-            project="Edutech",
-            config={
-                'epochs': 100,
-                'batch_size': 120,
-                'learning_rate': 0.001,
-                'fp16': True,
-                'compile': True,
-            }
-        )
-        # Use the wandb run ID for the branch name
-        branch_name = wandb.run.name
-        print(f"Created new run with ID: {branch_name}")
+    
+    # Initialize new wandb run
+    wandb.init(
+        project="Edutech",
+        config={
+            'epochs': 100,
+            'batch_size': 120,
+            'learning_rate': 0.001,
+            'fp16': True,
+            'compile': True,
+        }
+    )
+    branch_name = wandb.run.name
+    print(f"Created new run with ID: {branch_name}")
 
     # Setup HuggingFace repository and branch
     repo = setup_hf_repo(branch_name)
@@ -288,40 +314,33 @@ def main():
     # Add WandB callback
     add_wandb_callback(model)
 
-    # Load checkpoint if continuing existing run
-    start_epoch = 0
-    if choice == "2":
-        checkpoint_path, start_epoch = find_latest_checkpoint(HF_REPO, branch_name)
-        if checkpoint_path and os.path.exists(checkpoint_path):
-            checkpoint = torch.load(checkpoint_path)
-            model.model.load_state_dict(checkpoint['model_state_dict'])
-            if checkpoint['optimizer_state_dict']:
-                model.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            print(f"Resuming from epoch {start_epoch}")
-
     # Training loop
-    for epoch in range(start_epoch, 100, 5):  # Train in 5-epoch intervals
-        print(f"\nStarting training from epoch {epoch} to {epoch + 5}")
+    try:
         model.train(
             data='combined_dataset/data.yaml',
-            epochs=5,
+            epochs=50,
             imgsz=640,
-            batch=120,
+            batch=128,
             workers=32,
             exist_ok=True,
             device='0',
             project=wandb.run.project,
             verbose=True,
             amp=True,
-            resume=True if epoch > start_epoch else False,
             cache="ram",
+            save_period=1
         )
         
-        # Save checkpoint
-        save_checkpoint(model, epoch + 5, repo, branch_name)
-        print(f"Checkpoint saved for epoch {epoch + 5}")
-
-    wandb.finish()
+        # Save final model
+        print("Training completed. Saving final model...")
+        save_final_model(model, repo, branch_name)
+        
+    finally:
+        # Cleanup
+        torch.cuda.empty_cache()
+        import gc
+        gc.collect()
+        wandb.finish()
 
 if __name__ == "__main__":
     main()
