@@ -20,7 +20,6 @@ const center = {
 };
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const libraries = ["visualization"];
 
 // Custom map styling
 const customMapStyle = [
@@ -53,17 +52,10 @@ const customMapStyle = [
     }
 ];
 
-const noLabelsStyle = [
-    ...customMapStyle,
-    {
-        featureType: "all",
-        elementType: "labels",
-        stylers: [{ visibility: "off" }]
-    }
-];
+const libraries = ["visualization"];
 
 function Map() {
-    // const [garbageData, setGarbageData] = useState([]); // Using a state variable to store garbage data
+    const [garbageData, setGarbageData] = useState([]); // Using a state variable to store garbage data
     const [isFileUploadVisible, setFileUploadVisible] = useState(false);
 
     const showFileUpload = () => {
@@ -74,62 +66,73 @@ function Map() {
         setFileUploadVisible(false);
     };
 
-    const garbageData = [
-        new Garbage(1.4505, 103.5658, "2024-10-14", "https://3.bp.blogspot.com/-61RRlAbe-oI/WY9cjWUcqWI/AAAAAAAAAhs/1wFrbz13fDAaZYWHqQ6b5s2moW6OE_9zACLcBGAs/s1600/IMG_4980.jpg", 5),
-        new Garbage(1.43, 103.5858, "2024-10-13", "", 2),
-        new Garbage(1.4605, 103.5598, "2024-10-15", "", 3),
-        new Garbage(1.4450, 103.5708, "2024-10-14", "", 1),
-        new Garbage(1.4555, 103.5758, "2024-10-16", "", 9),
-        new Garbage(1.4375, 103.5808, "2024-10-13", "", 2),
-        new Garbage(1.4425, 103.5558, "2024-10-15", "", 3),
-        new Garbage(1.4655, 103.5908, "2024-10-14", "", 1),
-        new Garbage(1.4250, 103.5658, "2024-10-16", "", 2),
-        new Garbage(1.4705, 103.5758, "2024-10-13", "https://firebasestorage.googleapis.com/v0/b/airecondrone.appspot.com/o/DJI_1005.JPG?alt=media&token=8ec93425-6413-4018-8c4f-8962fa10a4a2", 5),
-        new Garbage(1.4325, 103.5958, "2024-10-15", "", 9),
-        new Garbage(1.4575, 103.5508, "2024-10-14", "", 1)
-        // Add more as needed
-    ];
+    const fetchGarbageData = async () => {
+        try {
+        const querySnapshot = await getDocs(collection(db, 'trash_detection'));
+        const fetchedGarbageData = querySnapshot.docs.map((doc) => {
+            const docData = doc.data();
+            return new Garbage(
+            docData.latitude,
+            docData.longitude,
+            docData.date_created,
+            docData.image_url,
+            docData.trash_count
+            );
+        });
+        setGarbageData(fetchedGarbageData); // Update the state with fetched data
+        } catch (error) {
+        console.error('Error fetching documents: ', error);
+        }
+    };
 
-    // const fetchGarbageData = async () => {
-    //     try {
-    //     const querySnapshot = await getDocs(collection(db, 'trash_detection'));
-    //     const fetchedGarbageData = querySnapshot.docs.map((doc) => {
-    //         const docData = doc.data();
-    //         return new Garbage(
-    //         docData.latitude,
-    //         docData.longitude,
-    //         docData.date_created,
-    //         docData.image_url,
-    //         docData.trash_count
-    //         );
-    //     });
-    //     setGarbageData([...preExistingData, ...fetchedGarbageData]); 
-    //     } catch (error) {
-    //     console.error('Error fetching documents: ', error);
-    //     }
-    // };
+    useEffect(() => {
+        fetchGarbageData();
+    }, []); // Run once on mount
 
-    // useEffect(() => {
-    //     fetchGarbageData();
-    // }, []); // Run once on mount
-
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [map, setMap] = useState(null);
-    const [showGarbage, setShowGarbage] = useState(true);
-    const [activeMarker, setActiveMarker] = useState(null);
+    const [showGarbage, setShowGarbage] = useState(false);
     const [showHeatmap, setShowHeatmap] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [activeMarker, setActiveMarker] = useState(null);
     const [heatmapData, setHeatmapData] = useState([]);
+    const [map, setMap] = useState(null);
     const [mapType, setMapType] = useState("roadmap");
     const [showLabels, setShowLabels] = useState(true);
+
+    const toggleLabels = () => {
+        if (map) {
+            console.log("Toggling labels. Current state:", showLabels);
+            const newStyle = showLabels
+                ? [
+                    ...customMapStyle,
+                    { featureType: "administrative", elementType: "labels", stylers: [{ visibility: "off" }] },
+                    { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] },
+                    { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+                    { featureType: "transit", elementType: "labels", stylers: [{ visibility: "off" }] },
+                    { featureType: "water", elementType: "labels", stylers: [{ visibility: "off" }] }
+                ]
+                : [...customMapStyle];
+    
+            console.log("New style being applied:", newStyle);
+            
+            map.setOptions({ styles: [] });
+            setTimeout(() => {
+                map.setOptions({ styles: newStyle });
+            }, 100);
+    
+            setShowLabels(prev => !prev);
+        }
+    };
 
     const onLoad = useCallback((map) => {
         setMap(map);
         setIsLoaded(true);
+        console.log('Map loaded:', map);
     }, []);
 
     const onUnmount = useCallback(() => {
         setMap(null);
     }, []);
+
 
     useEffect(() => {
         if (map && window.google && showHeatmap && isLoaded) {
@@ -145,23 +148,14 @@ function Map() {
         }
     }, [map, isLoaded, showHeatmap]);
 
-    const toggleLabels = useCallback(() => {
-        if (map) {
-            setShowLabels(prev => !prev);
-            map.setOptions({
-                styles: showLabels ? noLabelsStyle : customMapStyle
-            });
-        }
-    }, [map, showLabels]);
-
     const heatmapOptions = {
         radius: 40,
-        opacity: 0.7,
+        opacity: 0.8,
         gradient: [
-            'rgba(0, 0, 255, 0)',
-            'rgba(0, 255, 255, 1)',
+            'rgba(0, 255, 0, 0)',    
             'rgba(0, 255, 0, 1)',
             'rgba(255, 255, 0, 1)',
+            'rgba(255, 128, 0, 1)',
             'rgba(255, 0, 0, 1)'
         ]
     };
@@ -182,7 +176,7 @@ function Map() {
                     onLoad={onLoad}
                     onUnmount={onUnmount}
                     options={{
-                        styles: showLabels ? customMapStyle : noLabelsStyle,
+                        styles: customMapStyle,
                         disableDefaultUI: true,
                         zoomControl: true,
                         mapTypeControl: false,
@@ -236,7 +230,7 @@ function Map() {
             </LoadScript>
             <div style={{
     position: 'absolute',
-    bottom: '195px',
+    bottom: '50%',
     left: '20px',
     backgroundColor: 'white',
     borderRadius: '5px',
