@@ -24,7 +24,7 @@ bucket = storage.bucket()
 
 # Load YOLO model for trash detection
 print("Model Loaded")
-MODEL_PATH = 'yolo-1epoch.pt'
+MODEL_PATH = 'best.pt'
 model = YOLO(MODEL_PATH)
 
 def get_exif_data(image):
