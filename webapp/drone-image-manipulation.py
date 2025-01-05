@@ -28,4 +28,4 @@ def set_gps_location(image_path, lat, lon):
     img.save("modified_" + image_path, "jpeg", exif=exif_bytes)
 
 # Example usage
-set_gps_location("DJI_1004.JPG", 1.38414888888889, 103.64940000000001)  
+set_gps_location("DJI_1005.JPG", 1.4240888888888887, 103.62979999999999)  

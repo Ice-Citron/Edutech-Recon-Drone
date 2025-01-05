@@ -109,9 +109,6 @@ const FileUpload = ({ onUploadSuccess }) => {  // Fix here
                     onClick={handleUpload}>
         Upload
       </button>
-
-      {prediction && <p>{prediction}</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };

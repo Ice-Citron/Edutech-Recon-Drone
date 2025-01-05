@@ -149,11 +149,12 @@ function Map() {
     }, [map, isLoaded, showHeatmap]);
 
     const heatmapOptions = {
-        radius: 40,
+        radius: 30,
         opacity: 0.8,
         gradient: [
-            'rgba(0, 255, 0, 0)',    
-            'rgba(0, 255, 0, 1)',
+            'rgba(0, 128, 255, 0)',
+            'rgba(0, 255, 255, 1)',
+            'rgba(0, 255, 128, 1)',
             'rgba(255, 255, 0, 1)',
             'rgba(255, 128, 0, 1)',
             'rgba(255, 0, 0, 1)'
@@ -254,7 +255,6 @@ function Map() {
         <FileUpload onUploadSuccess={() => {
             hideFileUpload(); // Close the modal
             fetchGarbageData(); // Refresh the garbage data
-            fetchHeatmapData();
         }} />
     </Modal>
 </div>
