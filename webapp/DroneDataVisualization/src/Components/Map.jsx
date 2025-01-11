@@ -68,8 +68,8 @@ function Map() {
 
     const fetchGarbageData = async () => {
         try {
-        const querySnapshot = await getDocs(collection(db, 'trash_detection'));
-        const fetchedGarbageData = querySnapshot.docs.map((doc) => {
+            const querySnapshot = await getDocs(collection(db, 'trash_detection'));
+            const fetchedGarbageData = querySnapshot.docs.map((doc) => {
             const docData = doc.data();
             return new Garbage(
             docData.latitude,
@@ -80,8 +80,9 @@ function Map() {
             );
         });
         setGarbageData(fetchedGarbageData); // Update the state with fetched data
+        
         } catch (error) {
-        console.error('Error fetching documents: ', error);
+            console.error('Error fetching documents: ', error);
         }
     };
 

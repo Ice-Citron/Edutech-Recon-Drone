@@ -1,3 +1,5 @@
 .env
 node_modules
 ./src/Components/firebase.js
+package.json
+package-lock.json

@@ -1,3 +1,5 @@
 backend/airecondrone-firebase-adminsdk-1oiv0-cfdb4ae33a.json
 ./node_modules
 DroneDataVisualization/src/Components/firebase.js
+package-lock.json
+package.json
