@@ -1,0 +1,8 @@
+flask
+ultralytics
+flask-cors
+Pillow
+firebase-admin
+matplotlib
+numpy
+gunicorn
