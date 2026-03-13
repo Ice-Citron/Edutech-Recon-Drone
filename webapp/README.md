@@ -1,3 +1,5 @@
+# Recon Drone
+
 **Recon Drone** is a full-stack project for detecting and mapping environmental waste using drone imagery and computer vision.
 
 The system processes drone images, detects trash using a YOLO-based object detection model, and visualizes waste density on an interactive map.
