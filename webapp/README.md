@@ -8,34 +8,15 @@ This project was built for the **Edutech Asia 2024 Planet Protectors competition
 
 ---
 
-## Key Achievements
+## Features
 
-- **Champion** — Edutech Asia 2024 Planet Protectors
-- Presented the project to an audience of **1,000+ educators and industry professionals**
+- **Trash Detection:** Uses a YOLOv11 object detection model to detect and count waste objects in drone imagery.
 
----
+- **Geolocation:** Extracts EXIF metadata (GPS coordinates and timestamps) from uploaded images to determine where the image was captured.
 
-## Core Features
+- **Heatmap Visualization:** Displays waste density on an interactive map using the Google Maps Visualization API.
 
-### Automated Trash Detection (YOLOv11)
-
-Uses a **YOLOv11 object detection model** to identify and count waste objects in drone imagery.
-
-### Geospatial Mapping & Metadata Extraction
-
-Extracts **EXIF metadata** (GPS coordinates and timestamps) from uploaded images to determine where the image was captured.
-
-### Trash Density Heatmaps
-
-Generates heatmaps using the **Google Maps API Visualization Library** to show areas with high concentrations of waste.
-
-### Cloud Storage
-
-Stores images and detection results in **Firebase**:
-
-- Firestore for metadata and detection results  
-- Cloud Storage for uploaded images and processed outputs  
-
+- **Cloud Storage:** Images and detection results are stored in Firebase. Firestore stores metadata and detection results, while Cloud Storage stores uploaded images and processed outputs.
 ---
 
 ## Tech Stack
@@ -51,10 +32,10 @@ Stores images and detection results in **Firebase**:
 
 ## System Architecture
 
-1.  **Ingestion**: User uploads a drone image via the React frontend.
-2.  **Processing**: The Flask backend extracts GPS metadata and runs the YOLOv11 inference engine.
-3.  **Storage**: Original images and processed versions (with bounding boxes) are stored in Firebase Cloud Storage; metadata is saved to Firestore.
-4.  **Visualization**: The frontend fetches historical data from Firestore and renders markers and heatmaps on a customized Google Map.
+1.  User uploads a drone image via the React frontend.
+2.  The Flask backend extracts GPS metadata and runs the YOLOv11 inference engine.
+3.  Original images and processed versions (with bounding boxes) are stored in Firebase Cloud Storage; metadata is saved to Firestore.
+4.  The frontend fetches historical data from Firestore and renders markers and heatmaps on a customized Google Map.
 
 ---
 
@@ -77,7 +58,6 @@ Stores images and detection results in **Firebase**:
    ```bash
    pip install -r requirements.txt
    ```
-   _(Note: Ensure `ultralytics`, `flask`, `flask-cors`, `firebase-admin`, and `Pillow` are installed)_
 3. Add your `firebase-adminsdk.json` to the `backend` folder.
 4. Run the server:
    ```bash
@@ -113,6 +93,6 @@ Stores images and detection results in **Firebase**:
 
 ## Future Improvements
 
-- [ ] **Real-time Telemetry**: Direct integration with DJI/Mavic SDKs for live mapping.
-- [ ] **Temporal Analysis**: Tracking waste movement over time using historical data.
-- [ ] **Edge Deployment**: Optimizing the YOLO model for on-board drone processing (NVIDIA Jetson).
+- [ ] Direct integration with DJI/Mavic SDKs for live mapping.
+- [ ] Tracking waste movement over time using historical data.
+- [ ] Optimizing the YOLO model for on-board drone processing (NVIDIA Jetson).
