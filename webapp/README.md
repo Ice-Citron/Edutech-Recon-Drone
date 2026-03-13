@@ -1,42 +1,42 @@
-# EcoDrone: AI-Powered Environmental Surveillance 🛰️🚮
+**Recon Drone** is a full-stack project for detecting and mapping environmental waste using drone imagery and computer vision.
 
-[![Edutech Asia 2024 Champion](https://img.shields.io/badge/Award-Edutech%20Asia%202024%20Champion-gold?style=for-the-badge)](https://www.edutech.asia/)
-[![Python](https://img.shields.io/badge/Backend-Python%20%7C%20Flask-blue?style=for-the-badge&logo=python)](https://www.python.org/)
-[![React](https://img.shields.io/badge/Frontend-React%20%7C%20Vite-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![YOLOv11](https://img.shields.io/badge/AI-YOLOv11-green?style=for-the-badge)](https://github.com/ultralytics/ultralytics)
+The system processes drone images, detects trash using a YOLO-based object detection model, and visualizes waste density on an interactive map.
 
-**EcoDrone** is an award-winning full-stack solution designed to automate environmental monitoring using drone imagery and computer vision. Developed for the **Edutech Asia 2024 Planet Protectors** competition, this prototype leverages state-of-the-art AI to detect, quantify, and map environmental waste in real-time.
+This project was built for the **Edutech Asia 2024 Planet Protectors competition**, where it won **first place**.
 
 ---
 
-## 🌟 Key Achievements
+## Key Achievements
 
-- **Champion**: Edutech Asia 2024 Planet Protectors.
-- **Keynote**: Presented to an audience of 1,000+ industry leaders and educators.
-
----
-
-## 🚀 Core Features
-
-### 🔍 Automated Trash Detection (YOLOv11)
-
-Utilizes the latest **YOLOv11 CNN model** to identify and count waste particles in high-resolution drone imagery with high precision and low latency.
-
-### 📍 Geospatial Mapping & Metadata Extraction
-
-Automatically extracts **EXIF metadata** (GPS coordinates and timestamps) from uploaded images to precisely locate waste on an interactive map.
-
-### 📊 Trash Density Heatmaps
-
-Generates dynamic heatmaps using the **Google Maps API Visualization Library**, allowing authorities to identify "hot zones" and optimize cleanup resources.
-
-### ☁️ Scalable Cloud Architecture
-
-Integrated with **Firebase** (Firestore and Cloud Storage) for real-time data persistence, image hosting, and seamless cross-platform synchronization.
+- **Champion** — Edutech Asia 2024 Planet Protectors
+- Presented the project to an audience of **1,000+ educators and industry professionals**
 
 ---
 
-## 🛠️ Tech Stack
+## Core Features
+
+### Automated Trash Detection (YOLOv11)
+
+Uses a **YOLOv11 object detection model** to identify and count waste objects in drone imagery.
+
+### Geospatial Mapping & Metadata Extraction
+
+Extracts **EXIF metadata** (GPS coordinates and timestamps) from uploaded images to determine where the image was captured.
+
+### Trash Density Heatmaps
+
+Generates heatmaps using the **Google Maps API Visualization Library** to show areas with high concentrations of waste.
+
+### Cloud Storage
+
+Stores images and detection results in **Firebase**:
+
+- Firestore for metadata and detection results  
+- Cloud Storage for uploaded images and processed outputs  
+
+---
+
+## Tech Stack
 
 | Category     | Technology                                     |
 | :----------- | :--------------------------------------------- |
@@ -47,7 +47,7 @@ Integrated with **Firebase** (Firestore and Cloud Storage) for real-time data pe
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 1.  **Ingestion**: User uploads a drone image via the React frontend.
 2.  **Processing**: The Flask backend extracts GPS metadata and runs the YOLOv11 inference engine.
@@ -56,7 +56,7 @@ Integrated with **Firebase** (Firestore and Cloud Storage) for real-time data pe
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -103,18 +103,14 @@ Integrated with **Firebase** (Firestore and Cloud Storage) for real-time data pe
 
 ---
 
-## 📸 Preview
+## Preview
 
 <img width="1512" alt="EcoDrone Dashboard" src="https://github.com/user-attachments/assets/1b98faa7-382c-4f82-a061-e870f752fb0e" />
 
 ---
 
-## 🔮 Future Roadmap
+## Future Improvements
 
 - [ ] **Real-time Telemetry**: Direct integration with DJI/Mavic SDKs for live mapping.
 - [ ] **Temporal Analysis**: Tracking waste movement over time using historical data.
 - [ ] **Edge Deployment**: Optimizing the YOLO model for on-board drone processing (NVIDIA Jetson).
-
----
-
-_Developed with ❤️ for the Planet Protectors Initiative._
