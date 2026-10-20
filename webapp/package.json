@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.7"
+  }
+}
