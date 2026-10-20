@@ -1,11 +1,18 @@
 .DS_Store
+datasets/
+combined_dataset/
+runs/
+/wandb/
+training/wandb/
+training/EduTech-YOLOv11/
+*.pt
+node_modules/
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-
-
 
 # C extensions
 *.so

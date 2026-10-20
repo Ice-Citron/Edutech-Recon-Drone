@@ -2,7 +2,7 @@ from roboflow import Roboflow
 import os
 import shutil
 
-rf = Roboflow(api_key="<ROBOFLOW_API_KEY>")
+rf = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"])
 
 # List of datasets to download (workspace, dataset, version)
 datasets_info = [
