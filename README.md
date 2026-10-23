@@ -32,9 +32,9 @@ waste-handling resources in the appropriate location.
     <td width="33%"><a href="https://youtu.be/0D65uZaONBg"><img src="https://img.youtube.com/vi/0D65uZaONBg/maxresdefault.jpg" alt="Main-stage keynote"></a></td>
   </tr>
   <tr>
-    <td align="center"><b>Project video</b> (1 min)<br>Coastal litter detection with YOLO<br><a href="https://youtube.com/shorts/AQ2-JziMWtg">link</a></td>
-    <td align="center"><b>Finale team presentation</b><br>Google EDUtech Asia 2024<br><a href="https://youtu.be/nM7g6zC_H5I">link</a></td>
-    <td align="center"><b>Main-stage pitch</b><br>Marina Bay Sands Expo, Singapore<br><a href="https://youtu.be/0D65uZaONBg">link</a></td>
+    <td align="center"><b>Project video</b><br><a href="https://youtube.com/shorts/AQ2-JziMWtg">link</a></td>
+    <td align="center"><b>Finale team presentation</b><br><a href="https://youtu.be/nM7g6zC_H5I">link</a></td>
+    <td align="center"><b>Main-stage pitch</b><br><a href="https://youtu.be/0D65uZaONBg">link</a></td>
   </tr>
 </table>
 
