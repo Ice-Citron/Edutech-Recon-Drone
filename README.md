@@ -52,9 +52,13 @@ docs/       training guide, report PDF, W&B charts and photos
 
 ## Results
 
-We first tested our training code on an NVIDIA L4 from Google Colab, because it's cheaper to fail and make mistakes in Google Colab. Then, once our training code is tested, we fine-tuned a YOLOv11l model on waste classification using NVIDIA H100 spot instances from Google Cloud GCP. We logged our training curves and data to Weights & Biases and upload each checkpoint onto Hugging Face. 
+The goal was to ship a computer vision model that, using each image from Louis's drone data store, the model detects every piece of trash in it and classifies the type, before finally handing the bounding box detections to Jolie and Jonatas's Flask and Firebase backend for the heatmap.
 
-To fine-tune our computer vision model, we collected 300 thousand images from 25 open-source waste-classification related datasets and merged them on Roboflow. Our final model is a YOLOv11-L, fine-tuned for 9 epochs, reaching 0.381 mAP50 and 0.264 mAP50-95 on our validation set, and forward-passes an image in ~0.015 seconds on an NVIDIA L4. 
+We first experimented with a ViT classifier in September, and also with training a custom CNN from the ground up. In the end, I went with fine-tuning a YOLOv11 open-source waste datasets I collated from Roboflow. This is because a ViT classifier would’ve been too expensive to serve at scale, and I lacked the technical experience as well as both data and compute resources needed to train a custom classifier CNN from the ground up.
+
+Before any big training runs, we always tested our training code on an NVIDIA L4 from Google Colab, because it's cheaper to fail and make mistakes in Google Colab. Then, once our training code is tested, we fine-tuned a YOLOv11l model on waste classification using NVIDIA H100 spot instances from Google Cloud GCP. We logged our training curves and data to Weights & Biases and uploaded each checkpoint onto Hugging Face.
+
+To fine-tune our computer vision model, we collected 300 thousand images from 25 open-source waste-classification related datasets and merged them on Roboflow. Our final model is a YOLOv11-L, fine-tuned for 9 epochs, reaching 0.381 mAP50 and 0.264 mAP50-95 on our validation set, and forward-passes an image in ~0.015 seconds on an NVIDIA L4.
 
 The charts below are our logged training results from Weights & Biases:
 
