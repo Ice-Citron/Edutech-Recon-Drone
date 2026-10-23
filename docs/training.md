@@ -1,6 +1,9 @@
 ## Dataset
 
-We trained our model on seven public datasets from Roboflow, combined into one. `training/prepare_dataset.py` downloads them in YOLO format, merges them into `combined_dataset/`, and then maps their source classes onto the eight target classes below.
+We merged about 300 thousand images from 25 open-source datasets on Roboflow. 
+`training/prepare_dataset.py` downloads the seven Roboflow datasets into 
+`combined_dataset/`, before then mapping their source classes onto the eight 
+target classes below.
 
 | Class | Source classes folded in |
 |---|---|
@@ -24,6 +27,8 @@ We trained our model on seven public datasets from Roboflow, combined into one. 
 | **fluent-morning-79** | 2024-11-07 | YOLO11l | 8 | 9 | **0.381** | **0.264** |
 
 <p align="center"><img src="wandb/plots/fluent-morning-79/results.png" width="900" alt="fluent-morning-79: validation metrics and losses per epoch"></p>
+
+> Note: Each run uses its own validation split, so the numbers are not directly comparable.
 
 If you want to explore the runs yourself, visit [W&B report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) which is interactive, and [recon-drone-training-report.pdf](recon-drone-training-report.pdf) is a printed version of the report.
 

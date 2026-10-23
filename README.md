@@ -1,7 +1,7 @@
 # Google EDUtech Asia 2024: Team Recon Drone
 
 We (Jolie Teo, Olivier Bhogal, Jonatas Mancuso, Louis Gan and Shi Hao Ng)
-represented Marlboroguh College Malaysia as Team Recon Drone, and participated
+represented Marlborough College Malaysia as Team Recon Drone, and participated
 in Google EDUtech Asia's 2024 Planet Protectors Challenge held in Marina Bay
 Sands, Singapore. We won first place.
 
@@ -15,7 +15,7 @@ waste-handling resources in the appropriate location.
 
 [Project page](https://sienarindustries.com/project/edutech) ·
 [Weights on Hugging Face](https://huggingface.co/shng2025/EduTech-YOLOv11) ·
-[Weigths and Biases report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) ·
+[Weights and Biases report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) ·
 [Training report (PDF)](docs/recon-drone-training-report.pdf) ·
 [Instagram](https://www.instagram.com/mcmedutech/) ·
 [School article](https://www.marlboroughcollegemalaysia.org/mcm-success-at-edutech-asias-planet-protectors-challenge/)
