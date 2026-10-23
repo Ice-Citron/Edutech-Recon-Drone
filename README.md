@@ -14,7 +14,7 @@ them to root out the cause behind such accumulation, and also to concentrate
 waste-handling resources in the appropriate location.
 
 [Project page](https://sienarindustries.com/project/edutech) ·
-[Weights on Hugging Face](https://huggingface.co/shng2025/EduTech-YOLOv11) ·
+[Weights on Hugging Face](https://huggingface.co/shng2025/EDUtech-Recon-Drone-YOLOv11) ·
 [Weights and Biases report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) ·
 [Training report (PDF)](docs/recon-drone-training-report.pdf) ·
 [Instagram](https://www.instagram.com/mcmedutech/) ·
@@ -69,7 +69,7 @@ To read more about the training runs, the datasets we built, and how to repeat o
 from huggingface_hub import hf_hub_download
 from ultralytics import YOLO
 
-model = YOLO(hf_hub_download("shng2025/EduTech-YOLOv11", "weights/best.pt"))
+model = YOLO(hf_hub_download("shng2025/EDUtech-Recon-Drone-YOLOv11", "weights/best.pt"))
 model.predict("drone_photo.jpg", conf=0.25)[0].show()
 ```
 

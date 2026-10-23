@@ -52,7 +52,7 @@ export ROBOFLOW_API_KEY=...        # your own Roboflow key
 cd training
 python prepare_dataset.py          # downloads, merges and maps the datasets into combined_dataset/
 wandb login && hf auth login
-git clone https://huggingface.co/shng2025/EduTech-YOLOv11   # train.py writes checkpoints into this clone
+git clone https://huggingface.co/shng2025/EDUtech-Recon-Drone-YOLOv11 EduTech-YOLOv11   # train.py writes checkpoints into this clone
 python train.py                    # train_ddp.py is the multi-GPU variant
 python inference.py                # predictions on combined_dataset/images/valid
 ```
