@@ -1,10 +1,6 @@
-# Training
-
-How the Recon Drone detector was trained, and how to train it again.
-
 ## Dataset
 
-`training/prepare_dataset.py` downloads seven public Roboflow datasets in YOLO format. It merges them into `combined_dataset/` and maps the source classes onto eight target classes.
+We trained our model on seven public datasets from Roboflow, combined into one. `training/prepare_dataset.py` downloads them in YOLO format, merges them into `combined_dataset/`, and then maps their source classes onto the eight target classes below.
 
 | Class | Source classes folded in |
 |---|---|
@@ -17,15 +13,6 @@ How the Recon Drone detector was trained, and how to train it again.
 | Food Waste | food, decomposable |
 | Other | other litter, straw, fabrics, wood, cigarette, wrapper, lid, bottle cap |
 
-Sources on Roboflow Universe:
-
-- `hongmo/sea-ezx3q` v44
-- `kim-borma/marine-debris-vb2qm` v16
-- `myfyp/new-taco` v3
-- `anas-fd5bu/-kg` v5
-- `trash-detection-eka7g/aeriel-trash-detection` v5
-- `fyp-bfx3h/yolov8-trash-detections` v6 and `taco-ihjgk/yolov8-trash-detections-kgnug` v11
-
 ## Runs
 
 | Run | Date | Model | Classes | Epochs | mAP50 | mAP50-95 |
@@ -36,29 +23,22 @@ Sources on Roboflow Universe:
 | apricot-elevator-45 | 2024-10-23 | YOLO11l | 8 | 1 | 0.064 | 0.033 |
 | **fluent-morning-79** | 2024-11-07 | YOLO11l | 8 | 9 | **0.381** | **0.264** |
 
-Each number is on the validation split of that run's own dataset. Only the last three runs use the eight classes above. fluent-morning-79 trained with a script that had no W&B callback. Its metrics come from the `train_results` stored in its checkpoint.
-
 <p align="center"><img src="wandb/plots/fluent-morning-79/results.png" width="900" alt="fluent-morning-79: validation metrics and losses per epoch"></p>
 
-Charts and data:
-
-- `wandb/panels/`: the 32 panels of the W&B report.
-- `wandb/plots/<run>/`: the Ultralytics plots of each run (PR, F1, P and R curves, confusion matrices, prediction grids).
-- `wandb/history/`: per-epoch metrics of every run as CSV.
-
-The [W&B report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) is interactive. [recon-drone-training-report.pdf](recon-drone-training-report.pdf) is the printed version.
+If you want to explore the runs yourself, visit [W&B report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) which is interactive, and [recon-drone-training-report.pdf](recon-drone-training-report.pdf) is a printed version of the report.
 
 ## Settings of the final run
 
 | Setting | Value |
 |---|---|
 | Model | `yolo11l.pt`, pretrained, 25.3 M parameters |
+| GPU | one NVIDIA H100, Google Cloud spot instance |
 | Image size, batch | 640 px, 128 |
 | Precision | AMP (fp16), `cache=ram`, 32 workers |
 | Optimiser | Ultralytics auto, lr0 0.01, warm-up 3 epochs |
 | Checkpoints | one per epoch, pushed to the Hugging Face repo |
 
-The full argument list is in `training/configs/final_run_args.yaml`.
+The full list of arguments we passed to Ultralytics is in `training/configs/final_run_args.yaml`.
 
 ## Reproduce
 
@@ -74,4 +54,4 @@ python inference.py                # predictions on combined_dataset/images/vali
 
 ## Notebooks
 
-`training/notebooks/` holds the Colab notebooks in date order. They record the path from a ViT classifier in September 2024 to the YOLO11 checkpoint loop in October 2024. `docs/media/2024-10-04-yolov8-seg-demo.avi` is the output of the first YOLOv8 notebook.
+`training/notebooks/` holds our Colab notebooks in date order, and together they show how the project evolved, from the ViT classifier we first tried in September 2024 to the YOLOv11 training loop with per-epoch Hugging Face checkpoints we ended up with in October 2024. `docs/media/2024-10-04-yolov8-seg-demo.avi` is the output of our first YOLOv8 notebook.
