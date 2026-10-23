@@ -17,6 +17,7 @@ waste-handling resources in the appropriate location.
 [Weights on Hugging Face](https://huggingface.co/shng2025/EDUtech-Recon-Drone-YOLOv11) ·
 [Weights and Biases report](https://forge.coreweave.com/wandb/marlborough-college-malaysia/Edutech/reports/Recon-Drone-MCM-Edutech-Asia--VmlldzoxODE0OTE0OA) ·
 [Training report (PDF)](docs/recon-drone-training-report.pdf) ·
+[Poster (PDF)](docs/recon-drone-poster.pdf) ·
 [Instagram](https://www.instagram.com/mcmedutech/) ·
 [School article](https://www.marlboroughcollegemalaysia.org/mcm-success-at-edutech-asias-planet-protectors-challenge/)
 
@@ -73,7 +74,9 @@ model = YOLO(hf_hub_download("shng2025/EDUtech-Recon-Drone-YOLOv11", "weights/be
 model.predict("drone_photo.jpg", conf=0.25)[0].show()
 ```
 
-## EDUtech Asia 2024
+## Poster and Pictures
+
+<p align="center"><a href="docs/recon-drone-poster.pdf"><img src="docs/images/recon-drone-poster.jpg" width="560" alt="Our competition poster"></a></p>
 
 <table>
   <tr>
@@ -92,10 +95,10 @@ model.predict("drone_photo.jpg", conf=0.25)[0].show()
 
 ## Credits
 
-- Jolie Teo ([Crispy2chickens](https://github.com/Crispy2chickens)): web app and Firebase backend. Team lead.
-- Olivier Bhogal: pitch and outreach.
-- Jonatas Mancuso: web app and Google Maps heatmap.
-- Louis Gan: drone and DJI SDK.
-- Shi Hao Ng ([Ice-Citron](https://github.com/Ice-Citron)): machine learning, from the dataset pipeline to training. Initial team lead.
+- Jolie Teo ([Crispy2chickens](https://github.com/Crispy2chickens)): Lead Pipeline Engineer and Assistant Machine Learning Engineer. Team lead.
+- Olivier Bhogal: Creative Director and Assistant Pipeline Engineer.
+- Jonatas Mancuso: Lead Front-end Developer.
+- Louis Gan: Lead Drone Engineer and Assistant Pipeline Engineer.
+- Shi Hao Ng ([Ice-Citron](https://github.com/Ice-Citron)): Lead Machine Learning Engineer. Initial team lead.
 
 MIT License.
